@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.higgster.com)",
+      "WebFetch(domain:creativeandcritical.net)",
+      "Bash(git -C /c/code/target-time log --oneline -5)",
+      "WebFetch(domain:orm.drizzle.team)",
+      "Bash(npm i drizzle-orm pg dotenv)",
+      "Bash(npm i -D drizzle-kit tsx @types/pg)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/benhoyt/boggle/master/word-list.txt\" -o data/wordlist_raw.txt)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/jesstess/Scrabble/master/scrabble/sowpods.txt\" -o data/wordlist_raw.txt)",
+      "Bash(npx drizzle-kit push)",
+      "Bash(where pg_isready)",
+      "Bash(pg_isready -h localhost -p 5432)",
+      "Bash(sc query postgresql-x64-17)",
+      "Bash(sc query postgresql-x64-16)",
+      "Bash(sc query postgresql-x64-15)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(docker exec target-time-postgres psql -U postgres -c \"CREATE DATABASE target_time;\")"
+    ]
+  }
+}
