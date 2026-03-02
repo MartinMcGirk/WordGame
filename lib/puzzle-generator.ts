@@ -65,7 +65,7 @@ export function generatePuzzle(dictionary: Set<string>): PuzzleCandidate {
     }
 
     // Accept puzzles with a good word count
-    if (bestWords.length >= 25 && bestWords.length <= 100) {
+    if (bestWords.length >= 15 && bestWords.length <= 80) {
       // Arrange letters: center at position 4, others shuffled around
       const otherLetters = nineWord.split("");
       const centerIdx = otherLetters.indexOf(bestCenter);
@@ -88,7 +88,7 @@ export function generatePuzzle(dictionary: Set<string>): PuzzleCandidate {
       }
 
       // Good enough - stop searching
-      if (bestCandidate.totalWords >= 40) break;
+      if (bestCandidate.totalWords >= 20) break;
     }
   }
 

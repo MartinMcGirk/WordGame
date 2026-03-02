@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { getPuzzleByIndex } from "@/lib/puzzles";
 
 export async function POST(request: Request) {
-  const { puzzleIndex, word } = await request.json();
+  const { puzzleIndex } = await request.json();
 
-  if (puzzleIndex === undefined || !word) {
+  if (puzzleIndex === undefined) {
     return NextResponse.json(
-      { error: "puzzleIndex and word are required" },
+      { error: "puzzleIndex is required" },
       { status: 400 }
     );
   }
@@ -17,11 +17,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Puzzle not found" }, { status: 404 });
   }
 
-  const upperWord = word.toUpperCase().trim();
-  const isValid = puzzle.validWords.includes(upperWord);
-
   return NextResponse.json({
-    word: upperWord,
-    valid: isValid,
+    validWords: puzzle.validWords,
+    nineLetterWord: puzzle.nineLetterWord,
   });
 }

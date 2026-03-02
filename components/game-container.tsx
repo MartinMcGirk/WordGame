@@ -14,7 +14,7 @@ interface GameContainerProps {
 const STORAGE_KEY_PREFIX = "target-time-progress-";
 
 export function GameContainer({ puzzle }: GameContainerProps) {
-  const storageKey = `${STORAGE_KEY_PREFIX}${puzzle.id}`;
+  const storageKey = `${STORAGE_KEY_PREFIX}${puzzle.index}`;
 
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState("");
@@ -22,6 +22,8 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   const [success, setSuccess] = useState<string | undefined>();
   const [isValidating, setIsValidating] = useState(false);
   const [shuffledLetters, setShuffledLetters] = useState(puzzle.letters);
+  const [givenUp, setGivenUp] = useState(false);
+  const [allWords, setAllWords] = useState<string[] | undefined>();
 
   // Load saved progress from localStorage
   useEffect(() => {
@@ -85,6 +87,21 @@ export function GameContainer({ puzzle }: GameContainerProps) {
     setShuffledLetters(others.join(""));
   }, [shuffledLetters]);
 
+  const handleGiveUp = useCallback(async () => {
+    try {
+      const res = await fetch("/api/puzzle/reveal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ puzzleIndex: puzzle.index }),
+      });
+      const data = await res.json();
+      setAllWords(data.validWords);
+      setGivenUp(true);
+    } catch {
+      setError("Error revealing words");
+    }
+  }, [puzzle.index]);
+
   const handleSubmit = useCallback(async () => {
     const word = currentInput.toUpperCase().trim();
 
@@ -125,7 +142,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       const res = await fetch("/api/puzzle/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ puzzleId: puzzle.id, word }),
+        body: JSON.stringify({ puzzleIndex: puzzle.index, word }),
       });
       const data = await res.json();
 
@@ -155,26 +172,43 @@ export function GameContainer({ puzzle }: GameContainerProps) {
         onLetterClick={handleLetterClick}
       />
 
-      <button
-        onClick={handleShuffle}
-        className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300
-                   rounded-md hover:bg-gray-100 cursor-pointer"
-      >
-        Shuffle
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={handleShuffle}
+          className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300
+                     rounded-md hover:bg-gray-100 cursor-pointer"
+        >
+          Shuffle
+        </button>
+        {!givenUp && (
+          <button
+            onClick={handleGiveUp}
+            className="px-4 py-1.5 text-sm text-red-600 border border-red-300
+                       rounded-md hover:bg-red-50 cursor-pointer"
+          >
+            Give Up
+          </button>
+        )}
+      </div>
 
-      <WordInput
-        value={currentInput}
-        onChange={setCurrentInput}
-        onSubmit={handleSubmit}
-        onClear={handleClear}
-        onBackspace={handleBackspace}
-        disabled={isValidating}
-        error={error}
-        success={success}
+      {!givenUp && (
+        <WordInput
+          value={currentInput}
+          onChange={setCurrentInput}
+          onSubmit={handleSubmit}
+          onClear={handleClear}
+          onBackspace={handleBackspace}
+          disabled={isValidating}
+          error={error}
+          success={success}
+        />
+      )}
+
+      <FoundWordList
+        foundWords={foundWords}
+        totalWords={puzzle.totalWords}
+        allWords={allWords}
       />
-
-      <FoundWordList words={foundWords} totalWords={puzzle.totalWords} />
     </div>
   );
 }

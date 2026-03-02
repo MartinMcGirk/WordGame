@@ -1,9 +1,8 @@
 export interface PuzzleData {
-  id: number;
+  index: number;
   letters: string;
   centerLetter: string;
   totalWords: number;
-  date: string;
 }
 
 export type Rating = "Keep trying" | "Good" | "Very Good" | "Excellent";

@@ -1,26 +1,10 @@
-import { db } from "@/lib/db";
-import { puzzles } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { getPuzzleForDate } from "@/lib/puzzles";
 import { GameContainer } from "@/components/game-container";
 
-export default async function Home() {
-  const today = new Date().toISOString().split("T")[0];
+export const dynamic = "force-dynamic";
 
-  const puzzle = await db.query.puzzles.findFirst({
-    where: eq(puzzles.puzzleDate, today),
-  });
-
-  if (!puzzle) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Target Time</h1>
-        <p className="text-gray-500 text-lg">No puzzle available for today.</p>
-        <p className="text-gray-400 text-sm mt-2">
-          Generate one with: <code className="bg-gray-100 px-2 py-1 rounded">npm run puzzle:generate</code>
-        </p>
-      </main>
-    );
-  }
+export default function Home() {
+  const puzzle = getPuzzleForDate(new Date());
 
   return (
     <main className="flex min-h-screen flex-col items-center">
@@ -28,15 +12,21 @@ export default async function Home() {
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
           Target Time
         </h1>
-        <p className="text-sm text-gray-500 mt-1">{puzzle.puzzleDate}</p>
+        <p className="text-sm text-gray-500 mt-1">
+          {new Date().toLocaleDateString("en-AU", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
       </header>
       <GameContainer
         puzzle={{
-          id: puzzle.id,
+          index: puzzle.index,
           letters: puzzle.letters,
           centerLetter: puzzle.centerLetter,
           totalWords: puzzle.totalWords,
-          date: puzzle.puzzleDate,
         }}
       />
     </main>

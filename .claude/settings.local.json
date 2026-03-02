@@ -16,7 +16,17 @@
       "Bash(sc query postgresql-x64-16)",
       "Bash(sc query postgresql-x64-15)",
       "Bash(npx tsc --noEmit)",
-      "Bash(docker exec target-time-postgres psql -U postgres -c \"CREATE DATABASE target_time;\")"
+      "Bash(docker exec target-time-postgres psql -U postgres -c \"CREATE DATABASE target_time;\")",
+      "WebFetch(domain:wordlist.aspell.net)",
+      "WebFetch(domain:github.com)",
+      "Bash(awk 'length == 9' /c/code/target-time/data/wordlist.txt)",
+      "Bash(npx tsx scripts/remove-plurals.ts)",
+      "Bash(curl -sL \"http://app.aspell.net/create?max_size=60&spelling=GBs&spelling=US&max_variant=1&diacritic=strip&special=hacker&download=wordlist&encoding=utf-8&format=inline\" -o data/scowl_full.txt)",
+      "Bash(curl -sL \"http://app.aspell.net/create?max_size=60&spelling=GBs&spelling=US&max_variant=1&diacritic=strip&special=hacker&download=wordlist&encoding=utf-8&format=inline\")",
+      "Bash(npm install)",
+      "Bash(npx tsx scripts/generate-puzzle.ts)",
+      "Bash(node -e \"const p = require\\(''./data/puzzles.json''\\); console.log\\(''Puzzles:'', p.length\\); console.log\\(''First:'', JSON.stringify\\(p[0]\\).slice\\(0, 200\\)\\); console.log\\(''File size:'', require\\(''fs''\\).statSync\\(''./data/puzzles.json''\\).size, ''bytes''\\)\")",
+      "Bash(npm run build)"
     ]
   }
 }
