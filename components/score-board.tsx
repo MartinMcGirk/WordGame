@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { getRating } from "@/lib/types";
 
 interface ScoreBoardProps {
@@ -10,6 +11,7 @@ interface ScoreBoardProps {
 export function ScoreBoard({ found, total }: ScoreBoardProps) {
   const pct = total > 0 ? (found / total) * 100 : 0;
   const rating = getRating(found, total);
+  const prevFound = useRef(found);
 
   const milestones = [
     { label: "Good", pct: 30, count: Math.ceil(total * 0.3) },
@@ -17,6 +19,18 @@ export function ScoreBoard({ found, total }: ScoreBoardProps) {
     { label: "Excellent", pct: 70, count: Math.ceil(total * 0.7) },
     { label: "Perfect", pct: 100, count: total },
   ];
+
+  // Detect which milestones were just crossed this render
+  const justReached = new Set<string>();
+  for (const m of milestones) {
+    if (found >= m.count && prevFound.current < m.count) {
+      justReached.add(m.label);
+    }
+  }
+
+  useEffect(() => {
+    prevFound.current = found;
+  }, [found]);
 
   return (
     <div className="w-full">
@@ -31,6 +45,7 @@ export function ScoreBoard({ found, total }: ScoreBoardProps) {
       <div className="relative h-8 mb-1">
         {milestones.map((m) => {
           const reached = found >= m.count;
+          const popping = justReached.has(m.label);
           return (
             <div
               key={m.label}
@@ -43,6 +58,7 @@ export function ScoreBoard({ found, total }: ScoreBoardProps) {
                     ? "bg-amber-500 border-amber-500 text-white"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
+                style={popping ? { animation: "pop 0.4s ease-out" } : undefined}
               >
                 {reached ? (
                   <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">

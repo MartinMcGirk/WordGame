@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { GameBoard } from "./game-board";
 import { WordInput } from "./word-input";
 import { FoundWordList } from "./found-word-list";
@@ -26,6 +26,8 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   const [shuffledLetters, setShuffledLetters] = useState(puzzle.letters);
   const [givenUp, setGivenUp] = useState(false);
   const [allWords, setAllWords] = useState<string[] | undefined>();
+  const [confirmingGiveUp, setConfirmingGiveUp] = useState(false);
+  const giveUpTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // Load saved progress from localStorage (reset when puzzle changes)
   useEffect(() => {
@@ -59,6 +61,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
     setError(undefined);
     setSuccess(undefined);
     setShuffledLetters(puzzle.letters);
+    setConfirmingGiveUp(false);
   }, [storageKey, giveUpKey, puzzle.letters]);
 
   // Save progress whenever foundWords changes
@@ -78,6 +81,13 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       return () => clearTimeout(timer);
     }
   }, [error, success]);
+
+  // Clean up give-up confirmation timer
+  useEffect(() => {
+    return () => {
+      if (giveUpTimer.current) clearTimeout(giveUpTimer.current);
+    };
+  }, []);
 
   const handleLetterClick = useCallback((letter: string) => {
     setCurrentInput((prev) => prev + letter);
@@ -112,6 +122,18 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   }, [shuffledLetters]);
 
   const handleGiveUp = useCallback(async () => {
+    if (!confirmingGiveUp) {
+      setConfirmingGiveUp(true);
+      giveUpTimer.current = setTimeout(() => {
+        setConfirmingGiveUp(false);
+      }, 3000);
+      return;
+    }
+
+    // Second tap — actually give up
+    setConfirmingGiveUp(false);
+    if (giveUpTimer.current) clearTimeout(giveUpTimer.current);
+
     try {
       const res = await fetch("/api/puzzle/reveal", {
         method: "POST",
@@ -125,7 +147,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
     } catch {
       setError("Error revealing words");
     }
-  }, [puzzle.index, giveUpKey]);
+  }, [puzzle.index, giveUpKey, confirmingGiveUp]);
 
   const handleSubmit = useCallback(async () => {
     const word = currentInput.toUpperCase().trim();
@@ -189,32 +211,8 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   }, [currentInput, puzzle, foundWords]);
 
   return (
-    <div className="flex flex-col items-center gap-6 py-4 px-4 w-full max-w-sm">
+    <div className="flex flex-col items-center gap-5 py-4 px-4 w-full max-w-sm">
       <ScoreBoard found={foundWords.length} total={puzzle.totalWords} />
-
-      <GameBoard
-        letters={shuffledLetters}
-        onLetterClick={handleLetterClick}
-      />
-
-      <div className="flex gap-2">
-        <button
-          onClick={handleShuffle}
-          className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300
-                     rounded-md hover:bg-gray-100 cursor-pointer"
-        >
-          Shuffle
-        </button>
-        {!givenUp && (
-          <button
-            onClick={handleGiveUp}
-            className="px-4 py-1.5 text-sm text-red-600 border border-red-300
-                       rounded-md hover:bg-red-50 cursor-pointer"
-          >
-            Give Up
-          </button>
-        )}
-      </div>
 
       {!givenUp && (
         <WordInput
@@ -229,11 +227,38 @@ export function GameContainer({ puzzle }: GameContainerProps) {
         />
       )}
 
+      <GameBoard
+        letters={shuffledLetters}
+        onLetterClick={handleLetterClick}
+      />
+
+      <button
+        onClick={handleShuffle}
+        className="px-5 py-2 text-sm text-gray-600 border border-gray-300
+                   rounded-lg hover:bg-gray-100 active:scale-95
+                   transition-all cursor-pointer"
+      >
+        Shuffle
+      </button>
+
       <FoundWordList
         foundWords={foundWords}
         totalWords={puzzle.totalWords}
         allWords={allWords}
       />
+
+      {!givenUp && (
+        <button
+          onClick={handleGiveUp}
+          className={`text-sm transition-colors cursor-pointer ${
+            confirmingGiveUp
+              ? "text-red-600 font-medium"
+              : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          {confirmingGiveUp ? "Are you sure? Tap again to give up" : "Give up"}
+        </button>
+      )}
     </div>
   );
 }

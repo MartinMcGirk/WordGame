@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useEffect } from "react";
+
 interface FoundWordListProps {
   foundWords: string[];
   totalWords: number;
@@ -12,87 +14,104 @@ export function FoundWordList({
   allWords,
 }: FoundWordListProps) {
   const foundSet = new Set(foundWords);
+  const prevCount = useRef(foundWords.length);
+
+  // Track which words are "new" for animation
+  const newWordCount = foundWords.length - prevCount.current;
+  useEffect(() => {
+    prevCount.current = foundWords.length;
+  }, [foundWords.length]);
 
   // If revealed, show all words; otherwise show only found words
   const displayWords = allWords
     ? [...allWords].sort()
     : [...foundWords].sort();
 
+  // In normal mode, figure out which word was just added
+  const sortedFound = [...foundWords].sort();
+  const latestNewWords = newWordCount > 0
+    ? new Set(sortedFound.slice(-newWordCount))
+    : new Set<string>();
+
   return (
     <div className="w-full">
-      <h3 className="text-sm font-medium text-gray-500 mb-2">
-        {allWords
-          ? `Found ${foundWords.length} of ${totalWords} words`
-          : `Found: ${foundWords.length} / ${totalWords}`}
-      </h3>
-      <div className="max-h-72 overflow-y-auto border border-gray-200 rounded-lg p-3">
-        {displayWords.length === 0 ? (
-          <p className="text-gray-400 text-sm italic text-center">
-            No words found yet
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-1">
-            {displayWords.map((word) => {
-              const wasFound = foundSet.has(word);
-              const isNineLetter = word.length === 9;
+      <div className="flex items-baseline justify-between border-t border-gray-200 pt-3 mb-2">
+        <h3 className="text-sm font-medium text-gray-500">
+          {allWords
+            ? `Found ${foundWords.length} of ${totalWords}`
+            : `Found: ${foundWords.length} / ${totalWords}`}
+        </h3>
+      </div>
+      <div className="relative">
+        <div className="max-h-80 overflow-y-auto">
+          {displayWords.length === 0 ? (
+            <p className="text-gray-400 text-sm italic text-center py-4">
+              No words found yet
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-1">
+              {displayWords.map((word) => {
+                const wasFound = foundSet.has(word);
+                const isNineLetter = word.length === 9;
+                const isNew = !allWords && latestNewWords.has(word);
 
-              if (allWords) {
-                // Revealed mode: show all words, tick the found ones
+                if (allWords) {
+                  return (
+                    <span
+                      key={word}
+                      className={`
+                        inline-flex items-center gap-1 px-2 py-1.5 text-xs rounded-md font-mono uppercase
+                        ${
+                          isNineLetter
+                            ? wasFound
+                              ? "bg-amber-100 text-amber-800 font-bold"
+                              : "bg-amber-50 text-amber-600"
+                            : wasFound
+                              ? "bg-green-50 text-green-800"
+                              : "bg-gray-50 text-gray-400"
+                        }
+                      `}
+                    >
+                      {wasFound && (
+                        <svg
+                          className="w-3 h-3 shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                      {word}
+                    </span>
+                  );
+                }
+
                 return (
                   <span
                     key={word}
                     className={`
-                      inline-flex items-center gap-0.5 px-2 py-1 text-xs rounded-md font-mono uppercase
+                      inline-block px-2 py-1.5 text-xs rounded-md font-mono uppercase
                       ${
                         isNineLetter
-                          ? wasFound
-                            ? "bg-amber-100 text-amber-800 font-bold"
-                            : "bg-amber-50 text-amber-600"
-                          : wasFound
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-400"
+                          ? "bg-amber-100 text-amber-800 font-bold"
+                          : "bg-gray-100 text-gray-700"
                       }
                     `}
+                    style={isNew ? { animation: "slide-in 0.3s ease-out" } : undefined}
                   >
-                    {wasFound && (
-                      <svg
-                        className="w-3 h-3 shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
                     {word}
                   </span>
                 );
-              }
-
-              // Normal mode: only show found words
-              return (
-                <span
-                  key={word}
-                  className={`
-                    inline-block px-2 py-1 text-xs rounded-md font-mono uppercase
-                    ${
-                      isNineLetter
-                        ? "bg-amber-100 text-amber-800 font-bold"
-                        : "bg-gray-100 text-gray-700"
-                    }
-                  `}
-                >
-                  {word}
-                </span>
-              );
-            })}
-          </div>
-        )}
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
