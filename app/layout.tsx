@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Target Time",
+  title: "Word Game",
   description: "A daily nine-letter word puzzle",
 };
 

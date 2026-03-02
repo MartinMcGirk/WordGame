@@ -11,7 +11,7 @@ export interface StoredPuzzle {
 const puzzles: StoredPuzzle[] = puzzlesData;
 
 // Puzzles cycle from this start date
-const START_DATE = new Date("2026-03-01T00:00:00");
+const START_DATE = new Date("2026-02-20T00:00:00");
 
 function daysSince(date: Date): number {
   const diff = date.getTime() - START_DATE.getTime();
@@ -49,4 +49,4 @@ export function getRecentPuzzleDates(count: number): string[] {
   return dates;
 }
 
-export const START_DATE_STR = "2026-03-01";
+export const START_DATE_STR = "2026-02-20";

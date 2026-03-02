@@ -11,8 +11,8 @@ interface GameContainerProps {
   puzzle: PuzzleData;
 }
 
-const STORAGE_KEY_PREFIX = "target-time-progress-";
-const GIVEUP_KEY_PREFIX = "target-time-giveup-";
+const STORAGE_KEY_PREFIX = "word-game-progress-";
+const GIVEUP_KEY_PREFIX = "word-game-giveup-";
 
 export function GameContainer({ puzzle }: GameContainerProps) {
   const storageKey = `${STORAGE_KEY_PREFIX}${puzzle.index}`;

@@ -28,8 +28,8 @@ export function PreviousPuzzles({ puzzles }: PreviousPuzzlesProps) {
   useEffect(() => {
     const map = new Map<number, PuzzleProgress>();
     for (const p of puzzles) {
-      const saved = localStorage.getItem(`target-time-progress-${p.index}`);
-      const gaveUp = localStorage.getItem(`target-time-giveup-${p.index}`);
+      const saved = localStorage.getItem(`word-game-progress-${p.index}`);
+      const gaveUp = localStorage.getItem(`word-game-giveup-${p.index}`);
       let found = 0;
       if (saved) {
         try {

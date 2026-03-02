@@ -22,7 +22,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center">
       <header className="w-full max-w-md text-center pt-8 pb-2">
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-          Target Time
+          Word Game
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           {new Date().toLocaleDateString("en-AU", {

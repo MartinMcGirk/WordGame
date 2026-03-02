@@ -40,7 +40,7 @@ export default async function PuzzlePage({
           &larr; Today&apos;s puzzle
         </Link>
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight mt-2">
-          Target Time
+          Word Game
         </h1>
         <p className="text-sm text-gray-500 mt-1">{displayDate}</p>
       </header>
