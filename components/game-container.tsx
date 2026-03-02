@@ -27,7 +27,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   const [givenUp, setGivenUp] = useState(false);
   const [allWords, setAllWords] = useState<string[] | undefined>();
   const [confirmingGiveUp, setConfirmingGiveUp] = useState(false);
-  const giveUpTimer = useRef<ReturnType<typeof setTimeout>>();
+  const giveUpTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Load saved progress from localStorage (reset when puzzle changes)
   useEffect(() => {
