@@ -12,9 +12,11 @@ interface GameContainerProps {
 }
 
 const STORAGE_KEY_PREFIX = "target-time-progress-";
+const GIVEUP_KEY_PREFIX = "target-time-giveup-";
 
 export function GameContainer({ puzzle }: GameContainerProps) {
   const storageKey = `${STORAGE_KEY_PREFIX}${puzzle.index}`;
+  const giveUpKey = `${GIVEUP_KEY_PREFIX}${puzzle.index}`;
 
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState("");
@@ -25,17 +27,39 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   const [givenUp, setGivenUp] = useState(false);
   const [allWords, setAllWords] = useState<string[] | undefined>();
 
-  // Load saved progress from localStorage
+  // Load saved progress from localStorage (reset when puzzle changes)
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
         setFoundWords(JSON.parse(saved));
       } catch {
-        // Ignore corrupt data
+        setFoundWords([]);
       }
+    } else {
+      setFoundWords([]);
     }
-  }, [storageKey]);
+
+    const savedGiveUp = localStorage.getItem(giveUpKey);
+    if (savedGiveUp) {
+      try {
+        const parsed = JSON.parse(savedGiveUp);
+        setGivenUp(true);
+        setAllWords(parsed);
+      } catch {
+        setGivenUp(false);
+        setAllWords(undefined);
+      }
+    } else {
+      setGivenUp(false);
+      setAllWords(undefined);
+    }
+
+    setCurrentInput("");
+    setError(undefined);
+    setSuccess(undefined);
+    setShuffledLetters(puzzle.letters);
+  }, [storageKey, giveUpKey, puzzle.letters]);
 
   // Save progress whenever foundWords changes
   useEffect(() => {
@@ -97,10 +121,11 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       const data = await res.json();
       setAllWords(data.validWords);
       setGivenUp(true);
+      localStorage.setItem(giveUpKey, JSON.stringify(data.validWords));
     } catch {
       setError("Error revealing words");
     }
-  }, [puzzle.index]);
+  }, [puzzle.index, giveUpKey]);
 
   const handleSubmit = useCallback(async () => {
     const word = currentInput.toUpperCase().trim();
@@ -164,7 +189,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
   }, [currentInput, puzzle, foundWords]);
 
   return (
-    <div className="flex flex-col items-center gap-6 py-4 px-4">
+    <div className="flex flex-col items-center gap-6 py-4 px-4 w-full max-w-sm">
       <ScoreBoard found={foundWords.length} total={puzzle.totalWords} />
 
       <GameBoard

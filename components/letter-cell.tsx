@@ -12,7 +12,7 @@ export function LetterCell({ letter, isCenter, onClick }: LetterCellProps) {
       onClick={() => onClick(letter)}
       className={`
         flex items-center justify-center
-        w-16 h-16 sm:w-20 sm:h-20
+        w-full aspect-square
         text-2xl sm:text-3xl font-bold uppercase
         border-2 rounded-lg
         transition-colors duration-150

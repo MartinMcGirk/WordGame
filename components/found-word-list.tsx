@@ -19,7 +19,7 @@ export function FoundWordList({
     : [...foundWords].sort();
 
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full">
       <h3 className="text-sm font-medium text-gray-500 mb-2">
         {allWords
           ? `Found ${foundWords.length} of ${totalWords} words`

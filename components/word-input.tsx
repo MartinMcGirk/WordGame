@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
 
 interface WordInputProps {
   value: string;
@@ -23,33 +23,33 @@ export function WordInput({
   error,
   success,
 }: WordInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      onSubmit();
+    function handleKeyDown(e: KeyboardEvent) {
+      if (disabled) return;
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onSubmit();
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        onBackspace();
+      } else if (e.key === "Escape") {
+        onClear();
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        onChange(value + e.key.toUpperCase());
+      }
     }
-  };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [value, onChange, onSubmit, onClear, onBackspace, disabled]);
 
   return (
-    <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value.toUpperCase())}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        placeholder="Type a word..."
-        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg
-                   text-center text-xl font-mono uppercase tracking-widest
-                   focus:border-amber-400 focus:outline-none"
-      />
+    <div className="flex flex-col items-center gap-2 w-full">
+      <div
+        className="w-full px-4 py-3 min-h-[52px] border-b-2 border-gray-300
+                   text-center text-xl font-mono uppercase tracking-widest text-gray-800"
+      >
+        {value || <span className="text-gray-300">&#8203;</span>}
+      </div>
       <div className="flex gap-2">
         <button
           onClick={onClear}

@@ -9,7 +9,7 @@ interface GameBoardProps {
 
 export function GameBoard({ letters, onLetterClick }: GameBoardProps) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+    <div className="w-full max-w-[280px] grid grid-cols-3 gap-2 sm:gap-3">
       {letters.split("").map((letter, idx) => (
         <LetterCell
           key={idx}
