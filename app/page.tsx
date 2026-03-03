@@ -20,16 +20,15 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <header className="w-full max-w-md text-center pt-8 pb-2">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+      <header className="w-full max-w-md flex items-baseline justify-between px-4 pt-4 pb-1 sm:flex-col sm:items-center sm:pt-8 sm:pb-2">
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 tracking-tight">
           Word Game
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-xs sm:text-sm text-gray-500 sm:mt-1">
           {new Date().toLocaleDateString("en-AU", {
             weekday: "long",
-            year: "numeric",
-            month: "long",
             day: "numeric",
+            month: "short",
           })}
         </p>
       </header>
