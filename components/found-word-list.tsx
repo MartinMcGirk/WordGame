@@ -43,7 +43,7 @@ export function FoundWordList({
         </h3>
       </div>
       <div className="relative">
-        <div className="max-h-80 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto scrollbar-hidden" style={{ scrollbarWidth: "none" }}>
           {displayWords.length === 0 ? (
             <p className="text-gray-400 text-sm italic text-center py-4">
               No words found yet
