@@ -20,6 +20,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
 
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState("");
+  const [usedTileIndices, setUsedTileIndices] = useState<number[]>([]);
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [isValidating, setIsValidating] = useState(false);
@@ -58,6 +59,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
     }
 
     setCurrentInput("");
+    setUsedTileIndices([]);
     setError(undefined);
     setSuccess(undefined);
     setShuffledLetters(puzzle.letters);
@@ -89,23 +91,42 @@ export function GameContainer({ puzzle }: GameContainerProps) {
     };
   }, []);
 
-  const handleLetterClick = useCallback((letter: string) => {
-    setCurrentInput((prev) => prev + letter);
+  const handleTileClick = useCallback((index: number) => {
+    setCurrentInput((prev) => prev + shuffledLetters[index]);
+    setUsedTileIndices((prev) => [...prev, index]);
     setError(undefined);
     setSuccess(undefined);
-  }, []);
+  }, [shuffledLetters]);
 
   const handleClear = useCallback(() => {
     setCurrentInput("");
+    setUsedTileIndices([]);
     setError(undefined);
     setSuccess(undefined);
   }, []);
 
   const handleBackspace = useCallback(() => {
     setCurrentInput((prev) => prev.slice(0, -1));
+    setUsedTileIndices((prev) => prev.slice(0, -1));
     setError(undefined);
     setSuccess(undefined);
   }, []);
+
+  // Keyboard letter input: find first unused tile with that letter
+  // Prioritize the center tile (index 4) when typing the center letter
+  const handleKeyLetter = useCallback((letter: string) => {
+    const usedSet = new Set(usedTileIndices);
+    if (letter === shuffledLetters[4] && !usedSet.has(4)) {
+      handleTileClick(4);
+      return;
+    }
+    const idx = shuffledLetters.split("").findIndex(
+      (ch, i) => ch === letter && !usedSet.has(i)
+    );
+    if (idx !== -1) {
+      handleTileClick(idx);
+    }
+  }, [shuffledLetters, usedTileIndices, handleTileClick]);
 
   const handleShuffle = useCallback(() => {
     const center = shuffledLetters[4];
@@ -119,6 +140,9 @@ export function GameContainer({ puzzle }: GameContainerProps) {
     }
     others.splice(4, 0, center);
     setShuffledLetters(others.join(""));
+    // Clear input since tile positions changed
+    setCurrentInput("");
+    setUsedTileIndices([]);
   }, [shuffledLetters]);
 
   const handleGiveUp = useCallback(async () => {
@@ -157,8 +181,8 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       return;
     }
 
-    if (!word.includes(puzzle.centerLetter)) {
-      setError(`Must include center letter: ${puzzle.centerLetter}`);
+    if (!usedTileIndices.includes(4)) {
+      setError(`Must use the center letter: ${puzzle.centerLetter}`);
       return;
     }
 
@@ -180,6 +204,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       if ((available.get(letter) || 0) < count) {
         setError("Invalid letters used");
         setCurrentInput("");
+        setUsedTileIndices([]);
         return;
       }
     }
@@ -196,6 +221,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       if (data.valid) {
         setFoundWords((prev) => [...prev, word]);
         setCurrentInput("");
+        setUsedTileIndices([]);
         setError(undefined);
         setSuccess(
           word.length === 9 ? `${word} - Amazing!` : `${word} - Correct!`
@@ -217,7 +243,7 @@ export function GameContainer({ puzzle }: GameContainerProps) {
       {!givenUp && (
         <WordInput
           value={currentInput}
-          onChange={setCurrentInput}
+          onKeyLetter={handleKeyLetter}
           onSubmit={handleSubmit}
           onClear={handleClear}
           onBackspace={handleBackspace}
@@ -229,7 +255,8 @@ export function GameContainer({ puzzle }: GameContainerProps) {
 
       <GameBoard
         letters={shuffledLetters}
-        onLetterClick={handleLetterClick}
+        usedIndices={new Set(usedTileIndices)}
+        onTileClick={handleTileClick}
       />
 
       <button

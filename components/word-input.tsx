@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 interface WordInputProps {
   value: string;
-  onChange: (value: string) => void;
+  onKeyLetter: (letter: string) => void;
   onSubmit: () => void;
   onClear: () => void;
   onBackspace: () => void;
@@ -15,7 +15,7 @@ interface WordInputProps {
 
 export function WordInput({
   value,
-  onChange,
+  onKeyLetter,
   onSubmit,
   onClear,
   onBackspace,
@@ -35,12 +35,12 @@ export function WordInput({
       } else if (e.key === "Escape") {
         onClear();
       } else if (/^[a-zA-Z]$/.test(e.key)) {
-        onChange(value + e.key.toUpperCase());
+        onKeyLetter(e.key.toUpperCase());
       }
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [value, onChange, onSubmit, onClear, onBackspace, disabled]);
+  }, [onKeyLetter, onSubmit, onClear, onBackspace, disabled]);
 
   const message = error || success;
   const messageColor = error ? "text-red-500" : "text-green-600";
